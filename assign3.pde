@@ -261,7 +261,7 @@ void keyPressed(){
      ratX=0; 
      }
      break;
-     
+    
      case RIGHT:
      ratX+=80;
      if(ratX>560){
