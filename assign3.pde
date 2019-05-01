@@ -9,18 +9,21 @@ final int START_BUTTON_Y = 360;
 
 PImage title, gameover, startNormal, startHovered, restartNormal, restartHovered;
 PImage bg, soil8x24, life, soldier, vegetable, rat, stone1, stone2;
+PImage groundhogDown,groundhogIdle,groundhogLeft,groundhogRight;
 PImage []soil=new PImage [6];
+int soilbaseY=160;
 int lifeX=10;
 int ratX=320;
 int ratY=80;
-int soldierX=-80;
-int soldierY=floor(random(2,6))*80;
-int vegetableX=floor(random(8))*80;
-int vegetableY=floor(random(2,6))*80;
+int ratSpeed=80/15;
+boolean idle=true;
 // For debug function; DO NOT edit or remove this!
-int playerHealth = 0;
+int playerHealth = 2;
 float cameraOffsetY = 0;
 boolean debugMode = false;
+boolean downPressed=false;
+boolean leftPressed=false;
+boolean rightPressed=false;
 
 void setup() {
 	size(640, 480, P2D);
@@ -33,6 +36,10 @@ void setup() {
 	restartNormal = loadImage("img/restartNormal.png");
 	restartHovered = loadImage("img/restartHovered.png");
 	soil8x24 = loadImage("img/soil8x24.png");
+ groundhogDown = loadImage("img/groundhogDown.png");
+  groundhogIdle = loadImage("img/groundhogIdle.png");
+  groundhogLeft = loadImage("img/groundhogLeft.png");
+  groundhogRight = loadImage("img/groundhogRight.png");
   stone1=loadImage("img/stone1.png");
   stone2=loadImage("img/stone2.png");
   rat=loadImage("img/groundhogIdle.png");
@@ -67,7 +74,8 @@ void draw() {
 	    && START_BUTTON_X < mouseX
 	    && START_BUTTON_Y + START_BUTTON_H > mouseY
 	    && START_BUTTON_Y < mouseY) {
-
+      ratX=320;
+      ratY=80;
 			image(startHovered, START_BUTTON_X, START_BUTTON_Y);
 			if(mousePressed){
 				gameState = GAME_RUN;
@@ -96,7 +104,7 @@ void draw() {
 		// Grass
 		fill(124, 204, 25);
 		noStroke();
-		rect(0, 160 - GRASS_HEIGHT, width, GRASS_HEIGHT);
+		rect(0, soilbaseY - GRASS_HEIGHT, width, GRASS_HEIGHT);
 
 		// Soil - REPLACE THIS PART WITH YOUR LOOP CODE!
 		image(soil8x24, 0, 160);
@@ -104,7 +112,7 @@ void draw() {
     for(int i=0; i<8; i++){
     for(int j=0; j<4; j++){
       float soilX=i*width/8;
-      float soilY=width/8*2+j*width/8;
+      float soilY=soilbaseY+j*width/8;
       image(soil[0], soilX, soilY, width/8,width/8);
       image(soil[1], soilX, soilY+1*4*width/8, width/8,width/8);
       image(soil[2], soilX, soilY+2*4*width/8, width/8,width/8);
@@ -119,7 +127,7 @@ void draw() {
       for(int i=0; i<8; i++){
         float rock1X=i*80;
 
-        image(stone1,rock1X,width/8*2+rock1Y);
+        image(stone1,rock1X,soilbaseY+rock1Y);
         rock1Y+=80;       
       }
       //rock2
@@ -128,16 +136,16 @@ void draw() {
       for(int i=0; i<8; i++){
         float rock2XX=i*160;
         float rock2X=i*80;
-        image(stone1,width-80*7-rock2X,width/8*10+rock2Y);
-        image(stone1,width-80*6-rock2XX,width/8*10+rock2YY);
-        image(stone1,width-80*5-rock2XX,width/8*11+rock2YY);
-        image(stone1,width-80*3-rock2X,width/8*10+rock2Y);
-        image(stone1,width-80*2-rock2XX,width/8*10+rock2YY);
-        image(stone1,width-80-rock2XX,width/8*11+rock2YY);
-        image(stone1,width-80-rock2X,width/8*12+rock2Y);
-        image(stone1,width+80*2-rock2XX,width/8*10+rock2YY);
-        image(stone1,width+80-rock2XX,width/8*13+rock2YY);
-        image(stone1,width-80-rock2X,width/8*16+rock2Y);
+        image(stone1,width-80*7-rock2X,soilbaseY+width/8*8+rock2Y);
+        image(stone1,width-80*6-rock2XX,soilbaseY+width/8*8+rock2YY);
+        image(stone1,width-80*5-rock2XX,soilbaseY+width/8*9+rock2YY);
+        image(stone1,width-80*3-rock2X,soilbaseY+width/8*8+rock2Y);
+        image(stone1,width-80*2-rock2XX,soilbaseY+width/8*8+rock2YY);
+        image(stone1,width-80-rock2XX,soilbaseY+width/8*9+rock2YY);
+        image(stone1,width-80-rock2X,soilbaseY+width/8*10+rock2Y);
+        image(stone1,width+80*2-rock2XX,soilbaseY+width/8*8+rock2YY);
+        image(stone1,width+80-rock2XX,soilbaseY+width/8*11+rock2YY);
+        image(stone1,width-80-rock2X,soilbaseY+width/8*14+rock2Y);
         rock2Y+=80;    
         rock2YY+=160;
       }
@@ -146,60 +154,106 @@ void draw() {
       float rock3Y=0;
       for(int i=0; i<8; i++){
         float rock3X=i*80;
-        image(stone1,width-80*7-rock3X,width/8*18+rock3Y);
-        image(stone1,width-80*6-rock3X,width/8*18+rock3Y);
-        image(stone2,width-80*6-rock3X,width/8*18+rock3Y);
-        image(stone1,width-80*4-rock3X,width/8*18+rock3Y);
-        image(stone1,width-80*3-rock3X,width/8*18+rock3Y);
-        image(stone2,width-80*3-rock3X,width/8*18+rock3Y);
-        image(stone1,width-80-rock3X,width/8*19+rock3Y);
-        image(stone2,width-80-rock3X,width/8*19+rock3Y);
-        image(stone1,width-80-rock3X,width/8*18+rock3Y);
-        image(stone1,width-80-rock3X,width/8*21+rock3Y);
-        image(stone1,width-80-rock3X,width/8*22+rock3Y);
-        image(stone2,width-80-rock3X,width/8*22+rock3Y);
-        image(stone1,width-80-rock3X,width/8*24+rock3Y);
-        image(stone1,width-80-rock3X,width/8*25+rock3Y);
-        image(stone2,width-80-rock3X,width/8*25+rock3Y);
+        image(stone1,width-80*7-rock3X,soilbaseY+width/8*16+rock3Y);
+        image(stone1,width-80*6-rock3X,soilbaseY+width/8*16+rock3Y);
+        image(stone2,width-80*6-rock3X,soilbaseY+width/8*16+rock3Y);
+        image(stone1,width-80*4-rock3X,soilbaseY+width/8*16+rock3Y);
+        image(stone1,width-80*3-rock3X,soilbaseY+width/8*16+rock3Y);
+        image(stone2,width-80*3-rock3X,soilbaseY+width/8*16+rock3Y);
+        image(stone1,width-80-rock3X,soilbaseY+width/8*17+rock3Y);
+        image(stone2,width-80-rock3X,soilbaseY+width/8*17+rock3Y);
+        image(stone1,width-80-rock3X,soilbaseY+width/8*16+rock3Y);
+        image(stone1,width-80-rock3X,soilbaseY+width/8*19+rock3Y);
+        image(stone1,width-80-rock3X,soilbaseY+width/8*20+rock3Y);
+        image(stone2,width-80-rock3X,soilbaseY+width/8*20+rock3Y);
+        image(stone1,width-80-rock3X,soilbaseY+width/8*22+rock3Y);
+        image(stone1,width-80-rock3X,soilbaseY+width/8*23+rock3Y);
+        image(stone2,width-80-rock3X,soilbaseY+width/8*23+rock3Y);
         rock3Y+=80;       
       }
-      
-     
-      
-      
-      
+
       
       //rat
-      image(rat,ratX,ratY);
-      //soldier
-      image(soldier,soldierX,soldierY);
-      soldierX+=5;
-      if(soldierX>640){
-       soldierX=-80; 
-      }
-      if(ratX+80>soldierX && ratX<soldierX+80 && 
-      ratY+80>soldierY && ratY<soldierY+80){      
-      ratX=320;
-      ratY=80;
-
-      }
-      //vegetable
-      image(vegetable,vegetableX,vegetableY);
-      if(ratX+80>vegetableX && ratX<vegetableX+80 && 
-      ratY+80>vegetableY && ratY<vegetableY+80){  
-      vegetableX=-100;
-      vegetableY=-100;
-      
-      }
+     // image(rat,ratX,ratY);
+     
 		// Player
 
+    if(idle){
+     image(rat,ratX,ratY); 
+    }
+   if(downPressed){
+      if(ratY<height-80){
+        idle = false;
+        leftPressed = false;
+        rightPressed = false;
+        image(groundhogDown,ratX,ratY);
+        if(ratY < soilbaseY+80*19){
+         soilbaseY -= ratSpeed;
+          if(soilbaseY%80 == 0){
+          downPressed = false;
+          idle = true;
+          }
+        }else{
+          ratY += ratSpeed;
+          if(ratY%80 == 0){
+          downPressed = false;
+          idle = true;
+          }
+        } 
+      }else{
+        downPressed = false;
+        idle = true;
+      }
+    }
+     if(leftPressed){
+      if(ratX>0){
+        idle = false;
+        downPressed = false;
+        rightPressed = false;
+        image(groundhogLeft,ratX,ratY);
+        ratX -= ratSpeed;
+        if(ratX%80 == 0){
+          leftPressed = false;
+          idle = true;
+        }
+      }
+      else{
+        leftPressed = false;
+        idle = true;
+      }
+
+    }
+    
+    if(rightPressed){
+      if(ratX<width-80){
+        idle = false;
+        leftPressed = false;
+        downPressed = false;
+        image(groundhogRight,ratX,ratY);
+        ratX += ratSpeed;
+        if(ratX%80 == 0){
+          rightPressed = false;
+          idle = true;
+        }
+      }
+      else{
+        rightPressed = false;
+        idle = true;
+      }
+    }
+    
+
+
 		// Health UI
-    for(int i=0; i<5; i++){
-      playerHealth=i*70;
-     image(life, lifeX+playerHealth,10);
+    for(int i=0; i<playerHealth; i++){
+     image(life, lifeX+i*70,10);
 
      
     }
+     if(playerHealth == 0){
+      gameState = GAME_OVER;
+    }
+
 		break;
 
 		case GAME_OVER: // Gameover Screen
@@ -215,11 +269,12 @@ void draw() {
 				gameState = GAME_RUN;
 				mousePressed = false;
 				// Remember to initialize the game here!
-        vegetableX=floor(random(8))*80;
-        vegetableY=floor(random(2,6))*80;
-        soldierX=-80;
-        soldierY=floor(random(2,6))*80;
-        lifeX=10;
+      
+        ratX=320;
+        ratY=80;
+        playerHealth=2;
+    
+        
 			}
 		}else{
 
@@ -249,27 +304,28 @@ void keyPressed(){
      //break;
    
      case DOWN:
-     ratY+=80; 
-     if(ratY>25*80){
-     ratY=25*80; 
-     }
-     break;
-      
-     case LEFT:
-     ratX-=80;
-     if(ratX<0){
-     ratX=0; 
-     }
-     break;
-    
-     case RIGHT:
-     ratX+=80;
-     if(ratX>560){
-     ratX=560; 
-     }
-     break;    
-  }
- }
+           if(ratX%80 == 0 && ratY%80 == 0 && soilbaseY%80 == 0){
+            downPressed = true;
+            leftPressed = false;
+            rightPressed = false;
+          }
+          break;
+      case LEFT:
+          if(ratX%80 == 0 && ratY%80 == 0 && soilbaseY%80 == 0){
+            leftPressed = true;
+            downPressed = false;
+            rightPressed = false;
+          }
+          break;
+      case RIGHT:
+          if(ratX%80 == 0 && ratY%80 == 0 && soilbaseY%80 == 0){
+            rightPressed = true;
+            leftPressed = false;
+            downPressed = false;
+          }
+          break;
+      }
+    }
 
 	// DO NOT REMOVE OR EDIT THE FOLLOWING SWITCH/CASES
     switch(key){
